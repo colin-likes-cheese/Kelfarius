@@ -20,41 +20,45 @@
         max-width: 700px;
         display: flex;
         flex-direction: column;
-        gap: 25px;
+        gap: 30px;
     }
 
     .card {
         background: white;
         border-radius: 15px;
-        padding: 25px;
+        padding: 30px;
         box-shadow: 0 12px 30px rgba(0,0,0,0.25);
     }
 
     h2 {
         margin-top: 0;
         color: #333;
+        font-size: 1.8em;
     }
 
     .row {
         display: flex;
-        gap: 10px;
+        gap: 15px;
         flex-wrap: wrap;
-        margin: 10px 0;
+        margin: 15px 0;
     }
 
     input {
         flex: 1;
-        min-width: 120px;
-        padding: 10px;
-        border-radius: 8px;
-        border: 1px solid #ccc;
-        font-size: 16px;
+        min-width: 150px;
+        padding: 20px;
+        border-radius: 12px;
+        border: 2px solid #ccc;
+        font-size: 24px;
+        text-align: center;
+        font-weight: bold;
     }
 
     .info {
         margin-top: 10px;
         color: #555;
-        font-size: 14px;
+        font-size: 16px;
+        font-weight: bold;
     }
 </style>
 </head>
@@ -97,7 +101,11 @@ const fahrenheitInput = document.getElementById("fahrenheit");
 
 function fromKelvin() {
     let k = parseFloat(kelvinInput.value);
-    if (isNaN(k)) return;
+    if (isNaN(k)) {
+        celsiusInput.value = '';
+        fahrenheitInput.value = '';
+        return;
+    }
     let c = k - 273.15;
     let f = (c * 9/5) + 32;
     celsiusInput.value = c.toFixed(2);
@@ -106,7 +114,11 @@ function fromKelvin() {
 
 function fromCelsius() {
     let c = parseFloat(celsiusInput.value);
-    if (isNaN(c)) return;
+    if (isNaN(c)) {
+        kelvinInput.value = '';
+        fahrenheitInput.value = '';
+        return;
+    }
     let k = c + 273.15;
     let f = (c * 9/5) + 32;
     kelvinInput.value = k.toFixed(2);
@@ -115,7 +127,11 @@ function fromCelsius() {
 
 function fromFahrenheit() {
     let f = parseFloat(fahrenheitInput.value);
-    if (isNaN(f)) return;
+    if (isNaN(f)) {
+        celsiusInput.value = '';
+        kelvinInput.value = '';
+        return;
+    }
     let c = (f - 32) * 5/9;
     let k = c + 273.15;
     celsiusInput.value = c.toFixed(2);
@@ -161,7 +177,11 @@ setInterval(fetchRates, 10 * 60 * 1000);
 // Conversion functions
 function fromUSD() {
     let usd = parseFloat(usdInput.value);
-    if (isNaN(usd)) return;
+    if (isNaN(usd)) {
+        euroInput.value = '';
+        kelfariusInput.value = '';
+        return;
+    }
 
     let euro = usd * usdToEur;
     let kelf = usd * 10; // Kelfarius conversion
@@ -172,7 +192,11 @@ function fromUSD() {
 
 function fromEURO() {
     let euro = parseFloat(euroInput.value);
-    if (isNaN(euro)) return;
+    if (isNaN(euro)) {
+        usdInput.value = '';
+        kelfariusInput.value = '';
+        return;
+    }
 
     let usd = euro * eurToUsd;
     let kelf = usd * 10;
@@ -183,7 +207,11 @@ function fromEURO() {
 
 function fromKelfarius() {
     let kelf = parseFloat(kelfariusInput.value);
-    if (isNaN(kelf)) return;
+    if (isNaN(kelf)) {
+        usdInput.value = '';
+        euroInput.value = '';
+        return;
+    }
 
     let usd = kelf / 10;
     let euro = usd * usdToEur;
