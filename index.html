@@ -183,7 +183,7 @@ function updateFromEURO() {
     isUpdating = false;
 }
 
-// Kelfarius calculation from USD and EURO
+// Kelfarius calculation from USD + EURO converted to USD
 function updateKelfarius() {
     let usd = parseFloat(usdInput.value);
     let euro = parseFloat(euroInput.value);
@@ -191,7 +191,10 @@ function updateKelfarius() {
     if (isNaN(usd)) usd = 0;
     if (isNaN(euro)) euro = 0;
 
-    let kelf = 9.13 * usd + 1.23 * euro;
+    // Convert EURO to USD first
+    let euroInUSD = euro * usdToEur;
+
+    let kelf = 9.13 * usd + 1.23 * euroInUSD;
     kelfariusInput.value = kelf.toFixed(2);
 }
 
@@ -210,7 +213,7 @@ async function fetchRates() {
 
         rateInfo.textContent = `1 USD = ${usdToEur.toFixed(4)} EUR | 1 EUR = ${eurToUsd.toFixed(4)} USD`;
 
-        // Auto-update if boxes already have values
+        // Auto-update Kelfarius if boxes already have values
         if (usdInput.value) updateFromUSD();
         else if (euroInput.value) updateFromEURO();
 
