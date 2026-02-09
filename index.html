@@ -73,16 +73,16 @@
             <input type="number" id="kelvin" placeholder="Kelvin (K)">
             <input type="number" id="celsius" placeholder="Celsius (°C)">
             <input type="number" id="fahrenheit" placeholder="Fahrenheit (°F)">
+            <input type="number" id="kelfarius" placeholder="Kelfarius Dollars" readonly>
         </div>
     </div>
 
     <!-- Currency Converter -->
     <div class="card">
-        <h2>Kelfarius Currency Converter</h2>
+        <h2>Currency Converter</h2>
         <div class="row">
             <input type="number" id="usd" placeholder="USD">
             <input type="number" id="euro" placeholder="EURO">
-            <input type="number" id="kelfarius" placeholder="Kelfarius Dollars">
         </div>
         <div class="info" id="rateInfo">
             Loading exchange rates…
@@ -98,18 +98,22 @@
 const kelvinInput = document.getElementById("kelvin");
 const celsiusInput = document.getElementById("celsius");
 const fahrenheitInput = document.getElementById("fahrenheit");
+const kelfariusInput = document.getElementById("kelfarius");
 
+// Temperature conversion functions
 function fromKelvin() {
     let k = parseFloat(kelvinInput.value);
     if (isNaN(k)) {
         celsiusInput.value = '';
         fahrenheitInput.value = '';
+        kelfariusInput.value = '';
         return;
     }
     let c = k - 273.15;
     let f = (c * 9/5) + 32;
     celsiusInput.value = c.toFixed(2);
     fahrenheitInput.value = f.toFixed(2);
+    updateKelfariusFromTemp();
 }
 
 function fromCelsius() {
@@ -117,12 +121,14 @@ function fromCelsius() {
     if (isNaN(c)) {
         kelvinInput.value = '';
         fahrenheitInput.value = '';
+        kelfariusInput.value = '';
         return;
     }
     let k = c + 273.15;
     let f = (c * 9/5) + 32;
     kelvinInput.value = k.toFixed(2);
     fahrenheitInput.value = f.toFixed(2);
+    updateKelfariusFromTemp();
 }
 
 function fromFahrenheit() {
@@ -130,14 +136,32 @@ function fromFahrenheit() {
     if (isNaN(f)) {
         celsiusInput.value = '';
         kelvinInput.value = '';
+        kelfariusInput.value = '';
         return;
     }
     let c = (f - 32) * 5/9;
     let k = c + 273.15;
     celsiusInput.value = c.toFixed(2);
     kelvinInput.value = k.toFixed(2);
+    updateKelfariusFromTemp();
 }
 
+// Kelfarius calculation based on temperature
+function updateKelfariusFromTemp() {
+    let k = parseFloat(kelvinInput.value);
+    let c = parseFloat(celsiusInput.value);
+    let f = parseFloat(fahrenheitInput.value);
+
+    if (isNaN(k) || isNaN(c) || isNaN(f) || f === 0) {
+        kelfariusInput.value = '';
+        return;
+    }
+
+    let kelf = (9.87 * k) / f + 13.6 * c;
+    kelfariusInput.value = kelf.toFixed(2);
+}
+
+// Attach temperature listeners
 kelvinInput.addEventListener("input", fromKelvin);
 celsiusInput.addEventListener("input", fromCelsius);
 fahrenheitInput.addEventListener("input", fromFahrenheit);
@@ -146,15 +170,13 @@ fahrenheitInput.addEventListener("input", fromFahrenheit);
 /* =========================
    CURRENCY CONVERSION
 ========================= */
-let usdToEur = 0.92; // default fallback
+let usdToEur = 0.92; // fallback
 let eurToUsd = 1.09;
 
 const usdInput = document.getElementById("usd");
 const euroInput = document.getElementById("euro");
-const kelfariusInput = document.getElementById("kelfarius");
 const rateInfo = document.getElementById("rateInfo");
 
-// Prevent infinite loops when updating inputs
 let isUpdating = false;
 
 function updateFromUSD() {
@@ -162,15 +184,8 @@ function updateFromUSD() {
     isUpdating = true;
 
     let usd = parseFloat(usdInput.value);
-    if (isNaN(usd)) {
-        euroInput.value = '';
-        kelfariusInput.value = '';
-    } else {
-        let euro = usd * usdToEur;
-        let kelf = usd * 10;
-        euroInput.value = euro.toFixed(2);
-        kelfariusInput.value = kelf.toFixed(2);
-    }
+    if (isNaN(usd)) euroInput.value = '';
+    else euroInput.value = (usd * usdToEur).toFixed(2);
 
     isUpdating = false;
 }
@@ -180,33 +195,8 @@ function updateFromEURO() {
     isUpdating = true;
 
     let euro = parseFloat(euroInput.value);
-    if (isNaN(euro)) {
-        usdInput.value = '';
-        kelfariusInput.value = '';
-    } else {
-        let usd = euro * eurToUsd;
-        let kelf = usd * 10;
-        usdInput.value = usd.toFixed(2);
-        kelfariusInput.value = kelf.toFixed(2);
-    }
-
-    isUpdating = false;
-}
-
-function updateFromKelfarius() {
-    if (isUpdating) return;
-    isUpdating = true;
-
-    let kelf = parseFloat(kelfariusInput.value);
-    if (isNaN(kelf)) {
-        usdInput.value = '';
-        euroInput.value = '';
-    } else {
-        let usd = kelf / 10;
-        let euro = usd * usdToEur;
-        usdInput.value = usd.toFixed(2);
-        euroInput.value = euro.toFixed(2);
-    }
+    if (isNaN(euro)) usdInput.value = '';
+    else usdInput.value = (euro * eurToUsd).toFixed(2);
 
     isUpdating = false;
 }
@@ -214,9 +204,8 @@ function updateFromKelfarius() {
 // Event listeners
 usdInput.addEventListener("input", updateFromUSD);
 euroInput.addEventListener("input", updateFromEURO);
-kelfariusInput.addEventListener("input", updateFromKelfarius);
 
-// Fetch live rates from Frankfurter API
+// Fetch live exchange rates
 async function fetchRates() {
     try {
         const response = await fetch('https://api.frankfurter.app/latest?from=USD&to=EUR');
@@ -227,10 +216,9 @@ async function fetchRates() {
 
         rateInfo.textContent = `1 USD = ${usdToEur.toFixed(4)} EUR | 1 EUR = ${eurToUsd.toFixed(4)} USD`;
 
-        // Auto-update boxes if user has typed a value
+        // Auto-update if boxes already have values
         if (usdInput.value) updateFromUSD();
         else if (euroInput.value) updateFromEURO();
-        else if (kelfariusInput.value) updateFromKelfarius();
 
     } catch (err) {
         rateInfo.textContent = 'Failed to load live rates, using defaults.';
@@ -238,7 +226,7 @@ async function fetchRates() {
     }
 }
 
-// Initial fetch and refresh every 10 minutes
+// Initial fetch + refresh every 10 minutes
 fetchRates();
 setInterval(fetchRates, 10 * 60 * 1000);
 </script>
