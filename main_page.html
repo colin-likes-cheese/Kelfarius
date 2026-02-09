@@ -1,0 +1,138 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Kelfarius Live Converter</title>
+<style>
+    body {
+        font-family: Arial, sans-serif;
+        background: linear-gradient(135deg, #667eea, #764ba2);
+        margin: 0;
+        padding: 0;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        min-height: 100vh;
+    }
+
+    .container {
+        width: 90%;
+        max-width: 700px;
+        display: flex;
+        flex-direction: column;
+        gap: 25px;
+    }
+
+    .card {
+        background: white;
+        border-radius: 15px;
+        padding: 25px;
+        box-shadow: 0 12px 30px rgba(0,0,0,0.25);
+    }
+
+    h2 {
+        margin-top: 0;
+        color: #333;
+    }
+
+    .row {
+        display: flex;
+        gap: 10px;
+        flex-wrap: wrap;
+        margin: 10px 0;
+    }
+
+    input {
+        flex: 1;
+        min-width: 120px;
+        padding: 10px;
+        border-radius: 8px;
+        border: 1px solid #ccc;
+        font-size: 16px;
+    }
+
+    .info {
+        margin-top: 10px;
+        color: #555;
+        font-size: 14px;
+    }
+</style>
+</head>
+<body>
+
+<div class="container">
+
+    <!-- Temperature Converter -->
+    <div class="card">
+        <h2>Temperature Converter</h2>
+        <div class="row">
+            <input type="number" id="kelvin" placeholder="Kelvin (K)">
+            <input type="number" id="celsius" placeholder="Celsius (°C)">
+            <input type="number" id="fahrenheit" placeholder="Fahrenheit (°F)">
+        </div>
+    </div>
+
+    <!-- Currency Converter -->
+    <div class="card">
+        <h2>Kelfarius Currency Converter</h2>
+        <div class="row">
+            <input type="number" id="usd" placeholder="USD">
+            <input type="number" id="euro" placeholder="EURO">
+            <input type="number" id="kelfarius" placeholder="Kelfarius Dollars">
+        </div>
+        <div class="info" id="rateInfo">
+            Loading exchange rates…
+        </div>
+    </div>
+
+</div>
+
+<script>
+/* =========================
+   TEMPERATURE CONVERSION
+========================= */
+const kelvinInput = document.getElementById("kelvin");
+const celsiusInput = document.getElementById("celsius");
+const fahrenheitInput = document.getElementById("fahrenheit");
+
+function fromKelvin() {
+    let k = parseFloat(kelvinInput.value);
+    if (isNaN(k)) return;
+    let c = k - 273.15;
+    let f = (c * 9/5) + 32;
+    celsiusInput.value = c.toFixed(2);
+    fahrenheitInput.value = f.toFixed(2);
+}
+
+function fromCelsius() {
+    let c = parseFloat(celsiusInput.value);
+    if (isNaN(c)) return;
+    let k = c + 273.15;
+    let f = (c * 9/5) + 32;
+    kelvinInput.value = k.toFixed(2);
+    fahrenheitInput.value = f.toFixed(2);
+}
+
+function fromFahrenheit() {
+    let f = parseFloat(fahrenheitInput.value);
+    if (isNaN(f)) return;
+    let c = (f - 32) * 5/9;
+    let k = c + 273.15;
+    celsiusInput.value = c.toFixed(2);
+    kelvinInput.value = k.toFixed(2);
+}
+
+kelvinInput.addEventListener("input", fromKelvin);
+celsiusInput.addEventListener("input", fromCelsius);
+fahrenheitInput.addEventListener("input", fromFahrenheit);
+
+
+/* =========================
+   CURRENCY CONVERSION
+========================= */
+let usdToEur = 0.92; // fallback default
+let eurToUsd = 1.09;
+
+const usdInput = document.getElementById("usd");
+const euroInput = document.getElementById("euro");
+const kelfariusInput = document.getElementById("kelfarius");
