@@ -130,9 +130,73 @@ fahrenheitInput.addEventListener("input", fromFahrenheit);
 /* =========================
    CURRENCY CONVERSION
 ========================= */
-let usdToEur = 0.92; // fallback default
+let usdToEur = 0.92; // default fallback
 let eurToUsd = 1.09;
 
 const usdInput = document.getElementById("usd");
 const euroInput = document.getElementById("euro");
 const kelfariusInput = document.getElementById("kelfarius");
+const rateInfo = document.getElementById("rateInfo");
+
+// Fetch live rates from Frankfurter API
+async function fetchRates() {
+    try {
+        const response = await fetch('https://api.frankfurter.app/latest?from=USD&to=EUR');
+        const data = await response.json();
+
+        usdToEur = data.rates.EUR;
+        eurToUsd = 1 / usdToEur;
+
+        rateInfo.textContent = `1 USD = ${usdToEur.toFixed(4)} EUR | 1 EUR = ${eurToUsd.toFixed(4)} USD`;
+    } catch (err) {
+        rateInfo.textContent = 'Failed to load live rates, using defaults.';
+        console.error(err);
+    }
+}
+
+// Initial fetch and refresh every 10 minutes
+fetchRates();
+setInterval(fetchRates, 10 * 60 * 1000);
+
+// Conversion functions
+function fromUSD() {
+    let usd = parseFloat(usdInput.value);
+    if (isNaN(usd)) return;
+
+    let euro = usd * usdToEur;
+    let kelf = usd * 10; // Kelfarius conversion
+
+    euroInput.value = euro.toFixed(2);
+    kelfariusInput.value = kelf.toFixed(2);
+}
+
+function fromEURO() {
+    let euro = parseFloat(euroInput.value);
+    if (isNaN(euro)) return;
+
+    let usd = euro * eurToUsd;
+    let kelf = usd * 10;
+
+    usdInput.value = usd.toFixed(2);
+    kelfariusInput.value = kelf.toFixed(2);
+}
+
+function fromKelfarius() {
+    let kelf = parseFloat(kelfariusInput.value);
+    if (isNaN(kelf)) return;
+
+    let usd = kelf / 10;
+    let euro = usd * usdToEur;
+
+    usdInput.value = usd.toFixed(2);
+    euroInput.value = euro.toFixed(2);
+}
+
+// Event listeners
+usdInput.addEventListener("input", fromUSD);
+euroInput.addEventListener("input", fromEURO);
+kelfariusInput.addEventListener("input", fromKelfarius);
+</script>
+
+</body>
+</html>
