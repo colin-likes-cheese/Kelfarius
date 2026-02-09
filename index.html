@@ -154,6 +154,68 @@ const euroInput = document.getElementById("euro");
 const kelfariusInput = document.getElementById("kelfarius");
 const rateInfo = document.getElementById("rateInfo");
 
+// Prevent infinite loops when updating inputs
+let isUpdating = false;
+
+function updateFromUSD() {
+    if (isUpdating) return;
+    isUpdating = true;
+
+    let usd = parseFloat(usdInput.value);
+    if (isNaN(usd)) {
+        euroInput.value = '';
+        kelfariusInput.value = '';
+    } else {
+        let euro = usd * usdToEur;
+        let kelf = usd * 10;
+        euroInput.value = euro.toFixed(2);
+        kelfariusInput.value = kelf.toFixed(2);
+    }
+
+    isUpdating = false;
+}
+
+function updateFromEURO() {
+    if (isUpdating) return;
+    isUpdating = true;
+
+    let euro = parseFloat(euroInput.value);
+    if (isNaN(euro)) {
+        usdInput.value = '';
+        kelfariusInput.value = '';
+    } else {
+        let usd = euro * eurToUsd;
+        let kelf = usd * 10;
+        usdInput.value = usd.toFixed(2);
+        kelfariusInput.value = kelf.toFixed(2);
+    }
+
+    isUpdating = false;
+}
+
+function updateFromKelfarius() {
+    if (isUpdating) return;
+    isUpdating = true;
+
+    let kelf = parseFloat(kelfariusInput.value);
+    if (isNaN(kelf)) {
+        usdInput.value = '';
+        euroInput.value = '';
+    } else {
+        let usd = kelf / 10;
+        let euro = usd * usdToEur;
+        usdInput.value = usd.toFixed(2);
+        euroInput.value = euro.toFixed(2);
+    }
+
+    isUpdating = false;
+}
+
+// Event listeners
+usdInput.addEventListener("input", updateFromUSD);
+euroInput.addEventListener("input", updateFromEURO);
+kelfariusInput.addEventListener("input", updateFromKelfarius);
+
 // Fetch live rates from Frankfurter API
 async function fetchRates() {
     try {
@@ -164,6 +226,12 @@ async function fetchRates() {
         eurToUsd = 1 / usdToEur;
 
         rateInfo.textContent = `1 USD = ${usdToEur.toFixed(4)} EUR | 1 EUR = ${eurToUsd.toFixed(4)} USD`;
+
+        // Auto-update boxes if user has typed a value
+        if (usdInput.value) updateFromUSD();
+        else if (euroInput.value) updateFromEURO();
+        else if (kelfariusInput.value) updateFromKelfarius();
+
     } catch (err) {
         rateInfo.textContent = 'Failed to load live rates, using defaults.';
         console.error(err);
@@ -173,57 +241,6 @@ async function fetchRates() {
 // Initial fetch and refresh every 10 minutes
 fetchRates();
 setInterval(fetchRates, 10 * 60 * 1000);
-
-// Conversion functions
-function fromUSD() {
-    let usd = parseFloat(usdInput.value);
-    if (isNaN(usd)) {
-        euroInput.value = '';
-        kelfariusInput.value = '';
-        return;
-    }
-
-    let euro = usd * usdToEur;
-    let kelf = usd * 10; // Kelfarius conversion
-
-    euroInput.value = euro.toFixed(2);
-    kelfariusInput.value = kelf.toFixed(2);
-}
-
-function fromEURO() {
-    let euro = parseFloat(euroInput.value);
-    if (isNaN(euro)) {
-        usdInput.value = '';
-        kelfariusInput.value = '';
-        return;
-    }
-
-    let usd = euro * eurToUsd;
-    let kelf = usd * 10;
-
-    usdInput.value = usd.toFixed(2);
-    kelfariusInput.value = kelf.toFixed(2);
-}
-
-function fromKelfarius() {
-    let kelf = parseFloat(kelfariusInput.value);
-    if (isNaN(kelf)) {
-        usdInput.value = '';
-        euroInput.value = '';
-        return;
-    }
-
-    let usd = kelf / 10;
-    let euro = usd * usdToEur;
-
-    usdInput.value = usd.toFixed(2);
-    euroInput.value = euro.toFixed(2);
-}
-
-// Event listeners
-usdInput.addEventListener("input", fromUSD);
-euroInput.addEventListener("input", fromEURO);
-kelfariusInput.addEventListener("input", fromKelfarius);
 </script>
 
 </body>
