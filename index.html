@@ -73,16 +73,16 @@
             <input type="number" id="kelvin" placeholder="Kelvin (K)">
             <input type="number" id="celsius" placeholder="Celsius (°C)">
             <input type="number" id="fahrenheit" placeholder="Fahrenheit (°F)">
-            <input type="number" id="kelfarius" placeholder="Kelfarius Dollars" readonly>
         </div>
     </div>
 
     <!-- Currency Converter -->
     <div class="card">
-        <h2>Currency Converter</h2>
+        <h2>Kelfarius Currency Converter</h2>
         <div class="row">
             <input type="number" id="usd" placeholder="USD">
             <input type="number" id="euro" placeholder="EURO">
+            <input type="number" id="kelfarius" placeholder="Kelfarius Dollars" readonly>
         </div>
         <div class="info" id="rateInfo">
             Loading exchange rates…
@@ -98,7 +98,6 @@
 const kelvinInput = document.getElementById("kelvin");
 const celsiusInput = document.getElementById("celsius");
 const fahrenheitInput = document.getElementById("fahrenheit");
-const kelfariusInput = document.getElementById("kelfarius");
 
 // Temperature conversion functions
 function fromKelvin() {
@@ -106,14 +105,12 @@ function fromKelvin() {
     if (isNaN(k)) {
         celsiusInput.value = '';
         fahrenheitInput.value = '';
-        kelfariusInput.value = '';
         return;
     }
     let c = k - 273.15;
     let f = (c * 9/5) + 32;
     celsiusInput.value = c.toFixed(2);
     fahrenheitInput.value = f.toFixed(2);
-    updateKelfariusFromTemp();
 }
 
 function fromCelsius() {
@@ -121,14 +118,12 @@ function fromCelsius() {
     if (isNaN(c)) {
         kelvinInput.value = '';
         fahrenheitInput.value = '';
-        kelfariusInput.value = '';
         return;
     }
     let k = c + 273.15;
     let f = (c * 9/5) + 32;
     kelvinInput.value = k.toFixed(2);
     fahrenheitInput.value = f.toFixed(2);
-    updateKelfariusFromTemp();
 }
 
 function fromFahrenheit() {
@@ -136,29 +131,12 @@ function fromFahrenheit() {
     if (isNaN(f)) {
         celsiusInput.value = '';
         kelvinInput.value = '';
-        kelfariusInput.value = '';
         return;
     }
     let c = (f - 32) * 5/9;
     let k = c + 273.15;
     celsiusInput.value = c.toFixed(2);
     kelvinInput.value = k.toFixed(2);
-    updateKelfariusFromTemp();
-}
-
-// Kelfarius calculation based on temperature
-function updateKelfariusFromTemp() {
-    let k = parseFloat(kelvinInput.value);
-    let c = parseFloat(celsiusInput.value);
-    let f = parseFloat(fahrenheitInput.value);
-
-    if (isNaN(k) || isNaN(c) || isNaN(f) || f === 0) {
-        kelfariusInput.value = '';
-        return;
-    }
-
-    let kelf = (9.87 * k) / f + 13.6 * c;
-    kelfariusInput.value = kelf.toFixed(2);
 }
 
 // Attach temperature listeners
@@ -175,10 +153,12 @@ let eurToUsd = 1.09;
 
 const usdInput = document.getElementById("usd");
 const euroInput = document.getElementById("euro");
+const kelfariusInput = document.getElementById("kelfarius");
 const rateInfo = document.getElementById("rateInfo");
 
 let isUpdating = false;
 
+// Conversion functions
 function updateFromUSD() {
     if (isUpdating) return;
     isUpdating = true;
@@ -187,6 +167,7 @@ function updateFromUSD() {
     if (isNaN(usd)) euroInput.value = '';
     else euroInput.value = (usd * usdToEur).toFixed(2);
 
+    updateKelfarius();
     isUpdating = false;
 }
 
@@ -198,7 +179,20 @@ function updateFromEURO() {
     if (isNaN(euro)) usdInput.value = '';
     else usdInput.value = (euro * eurToUsd).toFixed(2);
 
+    updateKelfarius();
     isUpdating = false;
+}
+
+// Kelfarius calculation from USD and EURO
+function updateKelfarius() {
+    let usd = parseFloat(usdInput.value);
+    let euro = parseFloat(euroInput.value);
+
+    if (isNaN(usd)) usd = 0;
+    if (isNaN(euro)) euro = 0;
+
+    let kelf = 9.13 * usd + 1.23 * euro;
+    kelfariusInput.value = kelf.toFixed(2);
 }
 
 // Event listeners
